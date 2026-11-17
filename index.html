@@ -23,6 +23,15 @@ select{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;pad
 </head>
 <body><main>
 <header><h1>Household Wealth Forecast</h1><p>Plan your move, compare home purchase years, and see how buying affects your combined wealth.</p></header>
+<section class="card optimizer" id="private-defaults" hidden style="margin-bottom: 22px">
+<h2>Private defaults</h2>
+<p class="details">Import your local defaults file to prefill this browser. The file is read on this device and the defaults are saved here for your next visit.</p>
+<div class="optimizer-result">
+<label>Defaults file<input type="file" id="defaults-file" accept=".js,.json"></label>
+<button type="button" id="clear-defaults" hidden>Clear saved defaults</button>
+</div>
+<p class="details" id="defaults-status" role="status"></p>
+</section>
 <div class="layout">
 <form class="card" id="inputs">
 <p class="details">Enter both people’s balances and income. Take-home percentages start at 75% and can be adjusted using your pay stubs.</p>
