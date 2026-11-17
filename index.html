@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wealth Forecast</title>
+<style>
+:root{color-scheme:light;--ink:#182e2a;--muted:#526762;--paper:#f3f5ef;--line:#dce5dc;--green:#12674f;--gold:#9a6022}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,sans-serif}
+main{max-width:1320px;margin:auto;padding:40px 28px 60px}header{margin-bottom:28px}
+h1,h2,p{margin:0}h1{font:clamp(40px,6vw,66px)/1.05 Georgia,serif;letter-spacing:-.05em}header p{margin-top:10px;color:var(--muted)}h2{font-size:17px}
+.layout{display:grid;grid-template-columns:minmax(280px,335px) minmax(0,1fr);gap:22px;align-items:start}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}
+form,.results{display:grid;gap:14px}fieldset{border:0;padding:0;margin:0;min-width:0}fieldset+fieldset{border-top:1px solid var(--line);padding-top:13px}legend{float:left;width:100%;padding:0;margin:0 0 10px;font-weight:700}
+.fields{clear:both;display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:grid;gap:4px;font-size:12px;color:var(--muted);align-content:start}.wide{grid-column:1/-1}.check{display:flex;align-items:center;font-size:13px;gap:8px}input[type=checkbox]{accent-color:var(--green)}input[type=number]{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px;background:#f8faf7;color:var(--ink);font:inherit;font-size:14px}input[type=number]:focus{outline:2px solid var(--green);outline-offset:1px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.metric{padding:16px}.metric:first-child{background:#e0eee4}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{font-size:clamp(16px,2.4vw,28px);font-variant-numeric:tabular-nums}.details{color:var(--muted);font-size:13px;margin-top:6px}.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:10px 0;color:var(--muted);font-size:12px}.key{display:inline-flex;align-items:center;gap:6px}.key::before{content:"";width:16px;border-top:3px solid var(--green)}[hidden]{display:none!important}.key.baseline::before{border-top:2px dashed #6d7e84}.key.purchase::before{border-top:2px dotted var(--gold)}
+canvas{width:100%;height:310px;display:block}.scroll{overflow:auto;max-height:360px;margin-top:8px}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:8px;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}thead th{position:sticky;top:0;background:#f4f7f3}#status:empty{display:none}#status{background:#fff4dd;color:#68450f}.purchase-row{background:#eef5ec}summary{cursor:pointer;font-weight:650}
+@media(max-width:760px){main{padding:24px 14px}.layout{grid-template-columns:1fr}canvas{height:260px}.card{padding:14px}}@media(max-width:420px){.metrics{grid-template-columns:1fr}.metric{display:flex;align-items:center;justify-content:space-between}}
+.optimizer{border-color:#b9d3c4}.optimizer-result{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}.optimizer-result strong{font-size:24px}.optimizer button{border:0;border-radius:8px;background:var(--green);color:white;padding:9px 13px;font:inherit;font-weight:650;cursor:pointer}.optimizer button:disabled{opacity:.55;cursor:default}
+select{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px;background:#f8faf7;color:var(--ink);font:inherit;font-size:14px}
+</style>
+<script defer src="forecast.js"></script><script defer src="app.js"></script>
+</head>
+<body><main>
+<header><h1>Household Wealth Forecast</h1><p>Plan your move, compare home purchase years, and see how buying affects your combined wealth.</p></header>
+<div class="layout">
+<form class="card" id="inputs">
+<p class="details">Enter both people’s balances and income. Take-home percentages start at 75% and can be adjusted using your pay stubs.</p>
+<fieldset><legend>Person 1</legend><div class="fields">
+<label>Roth retirement ($)<input name="person1Roth" type="number" min="0" value="0" required></label>
+<label>Other retirement ($)<input name="yourRetirement" type="number" min="0" value="0" required></label>
+<label>Personal investments ($)<input name="yourInvestments" type="number" min="0" value="0" required></label>
+<label>Gross annual salary ($)<input name="person1Salary" type="number" min="0" value="0" required></label>
+<label>Estimated take-home (%)<input name="person1TakeHome" type="number" min="0" max="100" step="any" value="75" required></label>
+<label>Current rent or mortgage ($/mo)<input name="person1Housing" type="number" min="0" value="0" required></label>
+</div></fieldset>
+<fieldset><legend>Person 2</legend><div class="fields">
+<label>Roth retirement ($)<input name="roth" type="number" min="0" value="0" required></label>
+<label>Other retirement ($)<input name="traditional" type="number" min="0" value="0" required></label>
+<label>Personal investments ($)<input name="partnerInvestments" type="number" min="0" value="0" required></label>
+<label>Gross annual salary ($)<input name="person2Salary" type="number" min="0" value="0" required></label>
+<label>Estimated take-home (%)<input name="person2TakeHome" type="number" min="0" max="100" step="any" value="75" required></label>
+<label>Current rent or mortgage ($/mo)<input name="person2Housing" type="number" min="0" value="0" required></label>
+</div></fieldset>
+<fieldset><legend>Other household assets</legend><div class="fields">
+<label>Optional trust ($)<input name="trust" type="number" min="0" value="0" required></label>
+<label>Net home equity ($)<input name="equity" type="number" min="0" value="0" required></label>
+<label class="wide check"><input name="useTrust" type="checkbox"> Allow trust funds for withdrawals and closing</label>
+</div></fieldset>
+<fieldset><legend>Move-in and savings</legend><div class="fields">
+<label class="wide">Move in together in how many months? (0 = today)<input name="moveInMonths" type="number" min="0" max="720" value="12" required></label>
+<label class="wide">Earliest month you could move in (0 = today)<input name="earliestMoveMonths" type="number" min="0" max="720" value="0" required></label>
+<label class="wide check"><input name="useBudget" type="checkbox"> Estimate savings from income and expenses</label>
+<label data-manual>Ongoing savings ($/mo)<input name="monthlySavings" type="number" min="0" value="0" required></label>
+<label data-manual>Extra after moving in, until buying ($/mo)<input name="moveSavings" type="number" min="0" value="0" required></label>
+<label data-budget hidden>Combined non-housing expenses ($/mo)<input name="livingCosts" type="number" min="0" value="0" required></label>
+<label data-budget hidden>Housing payment after moving in<select name="movedHousing"><option value="person2">Person 2’s payment</option><option value="custom">Custom amount</option></select></label>
+<label id="custom-housing" hidden>Custom housing cost ($/mo)<input name="customHousing" type="number" min="0" value="0" required></label>
+<label data-budget hidden>Other housing costs after buying ($/mo)<input name="ownerCosts" type="number" min="0" value="0" required><span>Taxes, insurance, upkeep, or payments that continue.</span></label>
+</div></fieldset>
+<fieldset><legend>Person 1’s lease</legend><div class="fields">
+<label>Final rent month<input name="leaseEnd" type="month"></label>
+<label class="check"><input name="relet" type="checkbox"> Assume someone takes over</label>
+<label id="takeover-delay" hidden>Months of rent after moving out before takeover<input name="takeoverDelay" type="number" min="0" max="720" value="0" required></label>
+<p class="details wide">Budget mode includes any remaining rent and charges a one-month reletting fee when a takeover occurs before the lease ends. A custom shared payment should exclude Person 1’s old rent.</p>
+</div></fieldset>
+<fieldset><legend>Non-retirement withdrawals</legend><div class="fields">
+<label>One-time ($)<input name="withdrawal" type="number" min="0" value="0" required></label>
+<label>Annual ($)<input name="annual" type="number" min="0" value="0" required></label>
+<label class="wide">Start in how many years? (0 = today)<input name="withdrawIn" type="number" min="0" max="60" value="0" required></label>
+</div></fieldset>
+<fieldset><legend>Home purchase</legend><div class="fields">
+<label class="wide check"><input name="buy" type="checkbox" checked> Include home purchase</label>
+<label>Buy in how many years?<input name="buyIn" type="number" min="0" max="60" value="3" required></label>
+<label>Purchase price ($)<input name="price" type="number" min="0" value="500000" required></label>
+<label>Down payment (%)<input name="down" type="number" min="0" max="100" step="any" value="20" required></label>
+<label>Buyer closing costs ($)<input name="closing" type="number" min="0" value="10000" required></label>
+<label>Mortgage interest (%)<input name="interest" type="number" min="0" max="50" step="any" value="6" required></label>
+<label>Mortgage term (years)<input name="term" type="number" min="1" max="50" value="30" required></label>
+<label class="wide check"><input name="sell" type="checkbox" checked> Sell current home when buying</label>
+</div></fieldset>
+<fieldset><legend>Down payment optimizer</legend><div class="fields">
+<label>Minimum down (%)<input name="minimumDown" type="number" min="0" max="100" step="0.1" value="5" required></label>
+<label>Annual PMI rate (%)<input name="pmi" type="number" min="0" max="10" step="any" value="0.5" required></label>
+<label>Minimum cash reserve ($)<input name="cashReserve" type="number" min="0" value="50000" required></label>
+<label>Monthly loan payment cap ($)<input name="paymentCap" type="number" min="0" value="0" required><span>0 = no cap</span></label>
+</div></fieldset>
+<fieldset><legend>Growth assumptions</legend><div class="fields">
+<label>Retirement return (%)<input name="iraReturn" type="number" min="-100" max="100" step="any" value="6" required></label>
+<label>Personal investments and savings return (%)<input name="investingReturn" type="number" min="-100" max="100" step="any" value="5" required></label>
+<label>Trust return (%)<input name="trustReturn" type="number" min="-100" max="100" step="any" value="5" required></label>
+<label>New home growth (%)<input name="appreciation" type="number" min="-100" max="100" step="any" value="3" required></label>
+<label>Forecast years<input name="years" type="number" min="1" max="60" value="30" required></label>
+</div></fieldset>
+</form>
+<section class="results" aria-label="Forecast results">
+<div class="metrics" aria-live="polite">
+<div class="card metric"><span id="end-label">Ending net worth</span><strong id="ending"></strong></div>
+<div class="card metric"><span>Ending funds available outside retirement</span><strong id="available-end"></strong></div>
+<div class="card metric"><span>Vs. no purchase or withdrawals</span><strong id="difference"></strong></div>
+</div>
+<div class="card" id="status" role="status"></div>
+<section class="card optimizer"><h2>Optimize move-in date and down payment</h2>
+<p class="details">Compares move-in months before your selected purchase date. It uses your monthly budget, lease takeover setting, and purchase limits to find the pair with the highest ending wealth.</p>
+<p class="details">If Person 2’s mortgage is the shared payment and Person 1 keeps paying rent through the lease end, moving earlier leaves those bills unchanged. With a successful takeover, the rent avoided must exceed the one-month fee for the move to save money on housing.</p>
+<div class="optimizer-result"><button id="joint-run" type="button">Compare move-in months</button><button id="joint-apply" type="button" hidden>Use these settings</button></div>
+<p class="details" id="joint-result" role="status"></p>
+</section>
+<section class="card"><h2>Housing payments before buying</h2>
+<div class="scroll" tabindex="0" aria-label="Monthly housing payment schedule"><table><thead><tr><th scope="col">Phase</th><th scope="col">Person 1’s rent or fee</th><th scope="col">Person 2’s mortgage or shared payment</th><th scope="col">Total</th></tr></thead><tbody id="lease-rows"></tbody></table></div>
+<p class="details" id="lease-summary"></p><p class="details" id="lease-active"></p></section>
+<section class="card" id="budget-summary" hidden><h2>Monthly household budget</h2>
+<p class="details" id="budget-take-home"></p>
+<div class="metrics"><div class="metric"><span>Before moving in</span><strong id="budget-before"></strong></div><div class="metric" id="budget-overlap-card" hidden><span>After moving in, with rent or fee</span><strong id="budget-overlap"></strong></div><div class="metric"><span>After Person 1’s lease obligation ends</span><strong id="budget-moved"></strong></div><div class="metric"><span>After buying, at initial payment</span><strong id="budget-bought"></strong></div></div>
+<p class="details">Positive amounts go into household savings. Deficits draw from available funds outside retirement.</p>
+</section>
+<section class="card" aria-labelledby="timing-heading"><h2 id="timing-heading">When could you buy?</h2>
+<p class="details" id="timing-summary"></p>
+<div class="scroll" id="timing-table" tabindex="0" aria-label="Purchase year comparison" hidden><table><thead><tr><th scope="col">Purchase year</th><th scope="col">Funds at closing</th><th scope="col">Reserve after closing</th><th scope="col">Ending wealth</th><th scope="col">Limits</th></tr></thead><tbody id="timing-rows"></tbody></table></div>
+</section>
+<section class="card optimizer" aria-labelledby="optimizer-heading">
+<h2 id="optimizer-heading">Best modeled down payment</h2>
+<div class="optimizer-result"><strong id="optimizer-best" aria-live="polite"></strong><button id="optimizer-apply" type="button" hidden>Use this down payment</button></div>
+<p class="details" id="optimizer-details"></p>
+<p class="details" id="optimizer-rates"></p>
+<div class="scroll" id="optimizer-table" tabindex="0" hidden><table><caption class="details">Down payment comparison</caption><thead><tr><th scope="col">Down</th><th scope="col">Initial loan payment</th><th scope="col">Reserve after closing</th><th scope="col">Chart ending wealth</th><th scope="col" id="optimizer-difference-label">Ending difference vs. your selection</th><th scope="col">Limits</th></tr></thead><tbody id="optimizer-rows"></tbody></table></div>
+<p class="details" id="optimizer-method"></p>
+<p class="details">The payment cap covers principal, interest, and modeled private mortgage insurance (PMI). PMI applies below 20% down and is estimated on the original loan balance until the mortgage reaches 80% of the purchase price. Use your lender’s quoted rate, fees, and PMI to test specific offers.</p>
+</section>
+<section class="card"><h2>Projected net worth</h2><p class="details" id="purchase-summary"></p>
+<div class="legend"><span class="key">Your scenario</span><span class="key purchase" id="purchase-key">Same purchase, zero extra withdrawals</span><span class="key baseline">No purchase or withdrawals</span></div>
+<canvas id="chart" aria-label="Line chart of projected net worth. Values are available in the annual breakdown." role="img"></canvas>
+</section>
+<details class="card" open><summary>Annual breakdown</summary><div class="scroll" tabindex="0" aria-label="Annual forecast table"><table><thead><tr><th scope="col">Year</th><th scope="col">Person 1’s retirement</th><th scope="col">Person 2’s retirement</th><th scope="col">Person 1’s investments</th><th scope="col">Person 2’s investments</th><th scope="col">Household savings</th><th scope="col">Trust</th><th scope="col">Home equity</th><th scope="col">Net worth</th></tr></thead><tbody id="annual-rows"></tbody></table></div></details>
+<section class="card"><h2>Model assumptions</h2><p class="details">Balances use nominal, pre-tax dollars and fixed returns. Year 0 is today. Annual rows apply growth and monthly savings, then withdrawals, then any scheduled purchase. Extra move-in savings start in the month after you move and stop at closing. In manual mode, enter savings after regular expenses, including any new mortgage. In budget mode, the calculator holds pay and expenses steady and subtracts the new mortgage and PMI from take-home pay after closing.</p><p class="details">Existing home equity stays flat until sale. Sale proceeds go toward closing first, with any surplus added to household savings. Other withdrawals use household savings first, then both taxable investment balances in proportion to their size, then the trust if enabled. Retirement balances stay invested. Include property taxes, insurance, and maintenance in your budget inputs. The forecast excludes taxes on investment sales and trust distribution restrictions.</p></section>
+</section>
+</div></main></body></html>
