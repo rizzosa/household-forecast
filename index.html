@@ -23,37 +23,28 @@ select{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;pad
 </head>
 <body><main>
 <header><h1>Household Wealth Forecast</h1><p>Plan your move, compare home purchase years, and see how buying affects your combined wealth.</p></header>
-<section class="card optimizer" id="private-defaults" hidden style="margin-bottom: 22px">
-<h2>Private defaults</h2>
-<p class="details">Import your local defaults file to prefill this browser. The file is read on this device and the defaults are saved here for your next visit.</p>
-<div class="optimizer-result">
-<label>Defaults file<input type="file" id="defaults-file" accept=".js,.json"></label>
-<button type="button" id="clear-defaults" hidden>Clear saved defaults</button>
-</div>
-<p class="details" id="defaults-status" role="status"></p>
-</section>
 <div class="layout">
 <form class="card" id="inputs">
 <p class="details">Enter both people’s balances and income. Take-home percentages start at 75% and can be adjusted using your pay stubs.</p>
 <fieldset><legend>Person 1</legend><div class="fields">
-<label>Roth retirement ($)<input name="person1Roth" type="number" min="0" value="0" required></label>
-<label>Other retirement ($)<input name="yourRetirement" type="number" min="0" value="0" required></label>
-<label>Personal investments ($)<input name="yourInvestments" type="number" min="0" value="0" required></label>
-<label>Gross annual salary ($)<input name="person1Salary" type="number" min="0" value="0" required></label>
+<label>Roth retirement ($)<input name="person1Roth" type="number" min="0" value="67600" required></label>
+<label>Other retirement ($)<input name="yourRetirement" type="number" min="0" value="28600" required></label>
+<label>Personal investments ($)<input name="yourInvestments" type="number" min="0" value="41000" required></label>
+<label>Gross annual salary ($)<input name="person1Salary" type="number" min="0" value="115000" required></label>
 <label>Estimated take-home (%)<input name="person1TakeHome" type="number" min="0" max="100" step="any" value="75" required></label>
-<label>Current rent or mortgage ($/mo)<input name="person1Housing" type="number" min="0" value="0" required></label>
+<label>Current rent or mortgage ($/mo)<input name="person1Housing" type="number" min="0" value="2400" required></label>
 </div></fieldset>
 <fieldset><legend>Person 2</legend><div class="fields">
-<label>Roth retirement ($)<input name="roth" type="number" min="0" value="0" required></label>
-<label>Other retirement ($)<input name="traditional" type="number" min="0" value="0" required></label>
+<label>Roth retirement ($)<input name="roth" type="number" min="0" value="290000" required></label>
+<label>Other retirement ($)<input name="traditional" type="number" min="0" value="30000" required></label>
 <label>Personal investments ($)<input name="partnerInvestments" type="number" min="0" value="0" required></label>
-<label>Gross annual salary ($)<input name="person2Salary" type="number" min="0" value="0" required></label>
+<label>Gross annual salary ($)<input name="person2Salary" type="number" min="0" value="76000" required></label>
 <label>Estimated take-home (%)<input name="person2TakeHome" type="number" min="0" max="100" step="any" value="75" required></label>
-<label>Current rent or mortgage ($/mo)<input name="person2Housing" type="number" min="0" value="0" required></label>
+<label>Current rent or mortgage ($/mo)<input name="person2Housing" type="number" min="0" value="2200" required></label>
 </div></fieldset>
 <fieldset><legend>Other household assets</legend><div class="fields">
-<label>Optional trust ($)<input name="trust" type="number" min="0" value="0" required></label>
-<label>Net home equity ($)<input name="equity" type="number" min="0" value="0" required></label>
+<label>Optional trust ($)<input name="trust" type="number" min="0" value="330000" required></label>
+<label>Net home equity ($)<input name="equity" type="number" min="0" value="70000" required></label>
 <label class="wide check"><input name="useTrust" type="checkbox"> Allow trust funds for withdrawals and closing</label>
 </div></fieldset>
 <fieldset><legend>Move-in and savings</legend><div class="fields">
@@ -68,7 +59,7 @@ select{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;pad
 <label data-budget hidden>Other housing costs after buying ($/mo)<input name="ownerCosts" type="number" min="0" value="0" required><span>Taxes, insurance, upkeep, or payments that continue.</span></label>
 </div></fieldset>
 <fieldset><legend>Person 1’s lease</legend><div class="fields">
-<label>Final rent month<input name="leaseEnd" type="month"></label>
+<label>Final rent month<input name="leaseEnd" type="month" value="2027-08"></label>
 <label class="check"><input name="relet" type="checkbox"> Assume someone takes over</label>
 <label id="takeover-delay" hidden>Months of rent after moving out before takeover<input name="takeoverDelay" type="number" min="0" max="720" value="0" required></label>
 <p class="details wide">Budget mode includes any remaining rent and charges a one-month reletting fee when a takeover occurs before the lease ends. A custom shared payment should exclude Person 1’s old rent.</p>

@@ -16,95 +16,6 @@ let jointSettings;
 let jointResult;
 
 const monthAndYear = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' });
-const defaultsStorageKey = 'household-forecast.private-defaults.v1';
-const defaultFields = [
-  'person1Roth', 'yourRetirement', 'yourInvestments', 'person1Salary', 'person1Housing',
-  'roth', 'traditional', 'partnerInvestments', 'person2Salary', 'person2Housing',
-  'trust', 'equity', 'leaseEnd'
-];
-
-function readDefaults(text) {
-  const contents = text.trim();
-  const localScript = contents.match(/^window\.localForecastDefaults\s*=\s*([\s\S]+);$/);
-  const values = JSON.parse(localScript ? localScript[1] : contents);
-  if (!values || Array.isArray(values) || typeof values !== 'object') throw new Error('Invalid defaults');
-  const entries = Object.entries(values);
-  if (!entries.length || entries.some(([name, value]) => {
-    if (!defaultFields.includes(name)) return true;
-    if (name === 'leaseEnd') return typeof value !== 'string' || !/^(?:\d{4}-(?:0[1-9]|1[0-2]))?$/.test(value);
-    return !['number', 'string'].includes(typeof value) || !/^\d+$/.test(String(value)) ||
-      !Number.isSafeInteger(Number(value));
-  })) throw new Error('Invalid defaults');
-  return values;
-}
-
-function applyDefaults(values) {
-  for (const [name, value] of Object.entries(values)) {
-    form.elements.namedItem(name).value = value;
-  }
-}
-
-function resetDefaultFields() {
-  for (const name of defaultFields) {
-    const field = form.elements.namedItem(name);
-    field.value = field.defaultValue;
-  }
-}
-
-function initHostedDefaults() {
-  const fileInput = document.getElementById('defaults-file');
-  const clearButton = document.getElementById('clear-defaults');
-  document.getElementById('private-defaults').hidden = false;
-
-  try {
-    const saved = window.localStorage.getItem(defaultsStorageKey);
-    if (saved) {
-      applyDefaults(readDefaults(saved));
-      clearButton.hidden = false;
-      setText('defaults-status', 'Saved defaults loaded for this browser.');
-    }
-  } catch {
-    setText('defaults-status', 'Saved defaults could not be loaded. You can import them again.');
-  }
-
-  fileInput.addEventListener('change', async () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    let values;
-    try {
-      if (file.size > 16384) throw new Error('Defaults file is too large');
-      values = readDefaults(await file.text());
-    } catch {
-      setText('defaults-status', 'Could not read that file. Choose local-defaults.js or a JSON defaults file.');
-      return;
-    } finally {
-      fileInput.value = '';
-    }
-    resetDefaultFields();
-    applyDefaults(values);
-    clearButton.hidden = false;
-    update();
-    try {
-      window.localStorage.setItem(defaultsStorageKey, JSON.stringify(values));
-      setText('defaults-status', 'Defaults applied and saved in this browser.');
-    } catch {
-      setText('defaults-status', 'Defaults applied for this visit. This browser blocked saving them.');
-    }
-  });
-
-  clearButton.addEventListener('click', () => {
-    try {
-      window.localStorage.removeItem(defaultsStorageKey);
-    } catch {
-      setText('defaults-status', 'Browser storage could not be cleared. Clear this site’s data in your browser settings.');
-      return;
-    }
-    resetDefaultFields();
-    clearButton.hidden = true;
-    setText('defaults-status', 'Defaults cleared from this browser.');
-    update();
-  });
-}
 
 function resetJointOptimizer(settings) {
   jointSettings = settings;
@@ -427,16 +338,4 @@ document.getElementById('optimizer-apply').addEventListener('click', () => {
   update();
 });
 new ResizeObserver(drawChart).observe(chart);
-if (window.location.protocol === 'file:') {
-  const defaults = document.createElement('script');
-  defaults.src = 'local-defaults.js';
-  defaults.onload = () => {
-    applyDefaults(window.localForecastDefaults ?? {});
-    update();
-  };
-  defaults.onerror = update;
-  document.head.append(defaults);
-} else {
-  initHostedDefaults();
-  update();
-}
+update();
